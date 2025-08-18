@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+
+
+body {
+  @apply bg-gray-50/70 text-gray-700 font-sans;
+  scroll-behavior: smooth;
+}
