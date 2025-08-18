@@ -8,12 +8,12 @@ import {getStorage} from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBypbPaxRpuOSfhMsMbMXZ4VlCcfuvfz2w",
-  authDomain: "amplusecommerce.firebaseapp.com",
-  projectId: "amplusecommerce",
-  storageBucket: "amplusecommerce.firebasestorage.app",
-  messagingSenderId: "1063585400207",
-  appId: "1:1063585400207:web:bca3289f04342764e9f7fa"
+  apiKey: process.env.DATABASEAPIKEY,
+  authDomain: process.env.DATABASEDOMAIN,
+  projectId: process.env.PROJECTID,
+  storageBucket: process.env.STORAGEBUCKET,
+  messagingSenderId: process.env.MESSAGING_SENDER_ID ,
+  appId: process.env.APPID 
 };
 
 // Initialize Firebase
