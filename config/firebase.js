@@ -20,5 +20,5 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const Firebase_db = getFirestore(app);
 const Firebase_auth = getAuth(app);
-const Firebase_storage = getStorage(app,'gs://amplusecommerce.firebasestorage.app');
+const Firebase_storage = getStorage(app,`gs://${process.env.STORAGEBUCKET}`);
 export { Firebase_db, Firebase_auth, Firebase_storage };
