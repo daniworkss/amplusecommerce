@@ -57,10 +57,15 @@ export default function HeroSection() {
           </div>
 
 {/* for laptop view */}
-      <div className=" hidden lg:block relative h-[550px] bg-black md:h-[650px] lg:min-h-screen  bg-cover bg-no-repeat bg-center"style={{
-                  backgroundImage: `url(${'https://res.cloudinary.com/dccph2plo/image/upload/v1754990083/DSC04454_bnz1o3.jpg'})`,
-                 
-                }}>
+<div className="relative hidden lg:block h-[550px] lg:min-h-screen">
+      <Image
+        src="https://res.cloudinary.com/dccph2plo/image/upload/v1754990083/DSC04454_bnz1o3.jpg"
+        alt="Background"
+        fill
+        priority
+        quality={100}
+        className="object-cover"
+      />
        <div className="relative z-30 flex flex-col items-center justify-center h-full text-white text-center">
                 <h1 className="text-5xl  font-bold mb-4 drop-shadow-lg text-white">
                   STYLE THAT SPEAKS

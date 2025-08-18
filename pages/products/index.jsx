@@ -174,16 +174,19 @@ export default function ProductsPage() {
       <Header />
       <div className="">
         {/* Hero Section */}
-        <div
-        className="w-full bg-black h-[300px] md:h-[500px] bg-center bg-cover flex flex-col items-center justify-center"
-        style={{
-            backgroundImage: "url('https://res.cloudinary.com/dccph2plo/image/upload/v1754990083/DSC04454_bnz1o3.jpg')"
-        }}  
-        >
-        <h1 className="text-white text-4xl md:text-6xl font-bold text-center">
+        <div className="relative w-full h-[300px] md:h-[500px] flex flex-col items-center justify-center bg-black">
+          <Image
+            src="https://res.cloudinary.com/dccph2plo/image/upload/f_auto,q_auto,w_1600/DSC04454_bnz1o3.jpg"
+            alt="Banner background"
+            fill
+            priority
+            quality={100}
+            className="object-cover object-center"
+          />
+        <h1 className="text-white text-4xl z-10 md:text-6xl font-bold text-center">
             Street Culture. <span className="font-light">Elevated.</span>
         </h1>
-        <p className="text-white text-[12px] italic md:text-xl mt-4 text-center">
+        <p className="text-white text-[12px] z-10 italic md:text-xl mt-4 text-center">
         &quot;Style That Speaks for You&quot;
         </p>
     </div>
