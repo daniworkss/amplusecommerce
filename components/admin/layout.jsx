@@ -55,7 +55,7 @@ export default function Layout({children}){
                 <ul className="space-y-[20px]">
                     <Link  href={'/admin/dashboard/home'} className={pathname.includes('/admin/dashboard/home') ? activeLink : normalLink}><House size={18}/>Home</Link>
                     <Link href={'/admin/dashboard/orders'} className={pathname.includes('/admin/dashboard/orders') ? activeLink : normalLink}> <Archive size={18}/>Orders</Link>
-                    <Link href={'/admin/dashboard/products'} className={pathname.includes('/admin/dashboard/products') || pathname.includes('admin/dashboard/add-product') || pathname.includes('admin/dashboard/edit-product/') ? activeLink : normalLink}>  <Tag size={18}/>Products</Link>
+                    <Link href={'/admin/dashboard/products'} className={pathname.includes('/admin/dashboard/products') || pathname.includes('admin/dashboard/products/add-product') || pathname.includes('admin/dashboard/edit-product/') ? activeLink : normalLink}>  <Tag size={18}/>Products</Link>
                 </ul>
 
                 <div className="w-full flex justify-center mt-[3rem]">
@@ -95,7 +95,7 @@ export default function Layout({children}){
                 <ul className="space-y-[40px]">
                     <Link href={'/admin/dashboard/home'} className={pathname.includes('/admin/dashboard/home') ? activeLink : normalLink}><House size={18}/>Home</Link>
                     <Link href={'/admin/dashboard/orders'} className={pathname.includes('/admin/dashboard/orders') ? activeLink : normalLink}> <Archive size={18}/>Orders</Link>
-                    <Link href={'/admin/dashboard/products'} className={pathname.includes('/admin/dashboard/products') || pathname.includes('admin/dashboard/add-product') || pathname.includes('admin/dashboard/edit-product') ? activeLink : normalLink}>  <Tag size={18}/>Products</Link>
+                    <Link href={'/admin/dashboard/products'} className={pathname.includes('/admin/dashboard/products') || pathname.includes('admin/dashboard/products/add-product') || pathname.includes('admin/dashboard/edit-product') ? activeLink : normalLink}>  <Tag size={18}/>Products</Link>
                     
                 </ul>
 

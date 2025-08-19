@@ -194,21 +194,21 @@ import axios from "axios";
                   </div>
                 </div>
                 
-                <div className="flex items-start space-x-3">
+                {/* <div className="flex items-start space-x-3">
                   <Phone size={16} className="text-gray-400 mt-0.5 flex-shrink-0" />
                   <div>
                     <a className="text-gray-300 text-sm" href="tel:+15551234567">+1 (555) 123-4567</a>
                     <p className="text-gray-400 text-xs">Mon-Fri 9AM-6PM</p>
                   </div>
-                </div>
-                
+                </div> */}
+{/*                 
                 <div className="flex items-start space-x-3">
                   <MapPin size={16} className="text-gray-400 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-gray-300 text-sm">12809 Whiteholm Drive,  </p>
                     <p className="text-gray-400 text-xs">Upper Marlboro, MD, 20774, US</p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

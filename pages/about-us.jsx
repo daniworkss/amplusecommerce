@@ -257,19 +257,19 @@ scrollSpyDelay={100}  />
                         Have questions about our products or services? We'd love to hear from you.
                       </p>
                   </Slideup>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1  mb-8">
                   <Slideup percent={10} delay={0.4} className="flex items-center justify-center space-x-3">
                     <Mail className="text-gray-300" size={20} />
                     <span>amplus@amplusfashion.com</span>
                   </Slideup>
-                  <Slideup percent={10} delay={0.6} className="flex items-center justify-center space-x-3">
+                  {/* <Slideup percent={10} delay={0.6} className="flex items-center justify-center space-x-3">
                     <Phone className="text-gray-300" size={20} />
                     <span>+1 (555) 123-4567</span>
-                  </Slideup>
-                  <Slideup percent={10} delay={0.8} className="flex items-center justify-center space-x-3">
+                  </Slideup> */}
+                  {/* <Slideup percent={10} delay={0.8} className="flex items-center justify-center space-x-3">
                     <MapPin className="text-gray-300" size={20} />
                     <span>Upper Marlboro, MD</span>
-                  </Slideup>
+                  </Slideup> */}
                 </div>
                 <Slideup percent={10} delay={1}>
                     <Link href={'/contact'} className="bg-white text-black px-8 py-3 rounded-md font-semibold hover:bg-gray-100 transition-colors duration-200">

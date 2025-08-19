@@ -1,10 +1,15 @@
 'use client'
-import { useState } from "react";
-import { Upload, X, Plus, Check, Minus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Upload, X, Plus, Check, Minus, Trash2 } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import imageCompression from "browser-image-compression";
+import Layout from "@/components/admin/layout";
+import { useRouter } from "next/router";
 
-export default function AddOutfit() {
+export default function EditProduct() {
+  const router = useRouter();
+  const { id } = router.query;
+  
   const [name, setName] = useState("");
   const [specifications, setSpecifications] = useState([""]);
   const [price, setPrice] = useState("");
@@ -12,8 +17,11 @@ export default function AddOutfit() {
   const [inventory, setInventory] = useState("");
   const [sizeInventory, setSizeInventory] = useState({});
   const [colorInventory, setColorInventory] = useState({});
-  const [images, setImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [newImages, setNewImages] = useState([]);
+  const [imagesToDelete, setImagesToDelete] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
 
@@ -29,6 +37,104 @@ export default function AddOutfit() {
   ];
 
   const sizes = ['XS', 'S', 'M', 'L', 'XL', '2XL'];
+
+  // Fetch product data when component mounts
+  useEffect(() => {
+    if (id) {
+      fetchProductData();
+    }
+  }, [id]);
+
+  const fetchProductData = async () => {
+    try {
+      setIsLoadingData(true);
+      const response = await fetch(`/api/admin/getproduct`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const product = data.product;
+        console.log("Loaded product data:", product);
+        
+        // Populate form fields
+        setName(product.name || "");
+        
+        // Handle specifications - check multiple possible field names
+        let specs = [];
+        if (product.specifications && Array.isArray(product.specifications)) {
+          specs = product.specifications;
+        } else if (product.description) {
+          try {
+            specs = typeof product.description === 'string' 
+              ? JSON.parse(product.description) 
+              : product.description;
+          } catch (e) {
+            specs = [product.description];
+          }
+        }
+        setSpecifications(specs.length > 0 ? specs : [""]);
+        
+        setPrice(product.price?.toString() || "");
+        setCompareAtPrice(product.prevprice?.toString() || "");
+        setInventory(product.stock?.toString() || "");
+        
+        // Handle images
+        setExistingImages(product.images || []);
+        
+        // Handle colors and sizes - they might already be arrays or need parsing
+        let colors = [];
+        let sizes = [];
+        
+        if (product.colors) {
+          colors = Array.isArray(product.colors) 
+            ? product.colors 
+            : (typeof product.colors === 'string' ? JSON.parse(product.colors) : []);
+        }
+        
+        if (product.sizes) {
+          sizes = Array.isArray(product.sizes) 
+            ? product.sizes 
+            : (typeof product.sizes === 'string' ? JSON.parse(product.sizes) : []);
+        }
+        
+        setSelectedColors(colors);
+        setSelectedSizes(sizes);
+        
+        // Handle inventory data
+        if (product.colorInventory) {
+          const colorInv = typeof product.colorInventory === 'string' 
+            ? JSON.parse(product.colorInventory) 
+            : product.colorInventory;
+          setColorInventory(colorInv || {});
+        }
+        
+        if (product.sizeInventory) {
+          const sizeInv = typeof product.sizeInventory === 'string' 
+            ? JSON.parse(product.sizeInventory) 
+            : product.sizeInventory;
+          setSizeInventory(sizeInv || {});
+        }
+        
+        console.log("Set colors:", colors);
+        console.log("Set sizes:", sizes);
+        console.log("Set specifications:", specs);
+        
+      } else {
+        toast.error('Failed to load product data');
+      }
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      toast.error('Error loading product data');
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
 
   const handleColorToggle = (colorValue) => {
     setSelectedColors(prev => {
@@ -134,27 +240,30 @@ export default function AddOutfit() {
       // Calculate total from color inventory
       let total = 0;
       Object.values(colorInventory).forEach(colorData => {
-        if (typeof colorData === 'object') {
-          total += Object.values(colorData).reduce((sum, qty) => sum + (qty || 0), 0);
+        if (typeof colorData === 'object' && colorData !== null) {
+          total += Object.values(colorData).reduce((sum, qty) => sum + (parseInt(qty) || 0), 0);
         } else {
-          total += colorData || 0;
+          total += parseInt(colorData) || 0;
         }
       });
       return total;
+    } else if (selectedSizes.length > 0) {
+      // Use size inventory when sizes are selected
+      return Object.values(sizeInventory).reduce((total, qty) => total + (parseInt(qty) || 0), 0);
     } else {
-      // Use existing logic for single color or no colors
-      return Object.values(sizeInventory).reduce((total, qty) => total + (qty || 0), 0);
+      // Use simple inventory when no variants
+      return parseInt(inventory) || 0;
     }
   };
 
-  const handleImageChange = async (e) => {
+  const handleNewImageChange = async (e) => {
     if (!e.target.files) return;
 
-    const fileArray = Array.from(e.target.files).slice(0, 6);
+    const fileArray = Array.from(e.target.files).slice(0, 6 - existingImages.length);
 
     const options = {
-      maxSizeMB: 1, // target ≤ 1MB
-      maxWidthOrHeight: 1920, // resize if bigger
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
       useWebWorker: true
     };
 
@@ -167,15 +276,21 @@ export default function AddOutfit() {
           return compressedFile;
         })
       );
-      setImages(compressedImages);
+      setNewImages(prev => [...prev, ...compressedImages]);
     } catch (error) {
       console.error("Image compression error:", error);
       toast.error("Error compressing images");
     }
   };
 
-  const removeImage = (index) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
+  const removeExistingImage = (index) => {
+    const imageToDelete = existingImages[index];
+    setImagesToDelete(prev => [...prev, imageToDelete]);
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeNewImage = (index) => {
+    setNewImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const addSpecification = () => {
@@ -195,8 +310,8 @@ export default function AddOutfit() {
   };
 
   const handleSubmit = async () => {
-    if (images.length === 0) {
-      toast.error('Please add at least one image');
+    if (existingImages.length === 0 && newImages.length === 0) {
+      toast.error('Please keep or add at least one image');
       return;
     }
 
@@ -204,10 +319,13 @@ export default function AddOutfit() {
 
     const formData = new FormData();
 
-    images.forEach((image) => {
-      formData.append("images", image);
+    // Add new images
+    newImages.forEach((image) => {
+      formData.append("newImages", image);
     });
 
+    // Add data
+    formData.append("id", id);
     formData.append("name", name);
     formData.append("category", "outfits");
     formData.append("description", JSON.stringify(specifications.filter(spec => spec.trim() !== "")));
@@ -224,10 +342,12 @@ export default function AddOutfit() {
     
     formData.append("colors", JSON.stringify(selectedColors));
     formData.append("sizes", JSON.stringify(selectedSizes));
+    formData.append("existingImages", JSON.stringify(existingImages));
+    formData.append("imagesToDelete", JSON.stringify(imagesToDelete));
 
     try {
-      const response = await fetch('/api/upload-product', {
-        method: 'POST',
+      const response = await fetch('/api/admin/editproduct', {
+        method: 'PUT',
         body: formData,
       });
 
@@ -237,35 +357,38 @@ export default function AddOutfit() {
       if (!response.ok) {
         toast.error('Something went wrong. Please try again.');
       } else {
-        toast.success('Outfit added successfully!');
-        setName("");
-        setSpecifications([""]);
-        setPrice("");
-        setCompareAtPrice("");
-        setInventory("");
-        setSizeInventory({});
-        setColorInventory({});
-        setImages([]);
-        setSelectedColors([]);
-        setSelectedSizes([]);
+        toast.success('Product updated successfully!');
+        // Optionally redirect back to products page
+         router.push('/admin/dashboard/products');
       }
     } catch (error) {
-      console.error("Error uploading product:", error);
+      console.error("Error updating product:", error);
       toast.error('Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
+  if (isLoadingData) {
+    return (
+      <Layout>
+        <div className="flex justify-center min-h-screen pt-[6rem] lg:items-center">
+          <div className="w-8 h-8 border-4 border-gray-300 border-t-gray-900 rounded-full animate-spin"></div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
    <>
     <ToastContainer/>
-    <div className="min-h-screen ">
+   <Layout>
+   <div className="min-h-screen">
       <div className="max-w-4xl mx-auto py-8 px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-medium text-gray-900 mb-2">Add Outfit</h1>
-          <p className="text-gray-600">Create a new Outfit listing for your store</p>
+          <h1 className="text-2xl font-medium text-gray-900 mb-2">Edit Product</h1>
+          <p className="text-gray-600">Update your product information</p>
         </div>
 
         <div className="space-y-6">
@@ -274,7 +397,58 @@ export default function AddOutfit() {
             <h2 className="text-lg font-medium text-gray-900 mb-4">Images</h2>
             
             <div className="space-y-4">
-              {images.length === 0 ? (
+              {/* Existing Images */}
+              {existingImages.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">Current Images</h3>
+                  <div className="grid grid-cols-4 gap-4 mb-4">
+                    {existingImages.map((imageUrl, index) => (
+                      <div key={`existing-${index}`} className="relative group aspect-square">
+                        <img
+                          src={imageUrl}
+                          alt={`Existing ${index + 1}`}
+                          className="w-full h-full object-cover rounded-lg border border-gray-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeExistingImage(index)}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* New Images */}
+              {newImages.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">New Images</h3>
+                  <div className="grid grid-cols-4 gap-4 mb-4">
+                    {newImages.map((image, index) => (
+                      <div key={`new-${index}`} className="relative group aspect-square">
+                        <img
+                          src={URL.createObjectURL(image)}
+                          alt={`New ${index + 1}`}
+                          className="w-full h-full object-cover rounded-lg border border-gray-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeNewImage(index)}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Upload new images */}
+              {(existingImages.length + newImages.length) === 0 ? (
                 <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition-colors">
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <Upload className="w-10 h-10 mb-3 text-gray-400" />
@@ -287,44 +461,23 @@ export default function AddOutfit() {
                     type="file"
                     name="images"
                     multiple
-                    onChange={handleImageChange}
+                    onChange={handleNewImageChange}
                     accept="image/*"
                     className="hidden"
                   />
                 </label>
               ) : (
-                <div>
-                  <div className="grid grid-cols-4 gap-4 mb-4">
-                    {images.map((image, index) => (
-                      <div key={index} className="relative group aspect-square">
-                        <img
-                          src={URL.createObjectURL(image)}
-                          alt={`Product ${index + 1}`}
-                          className="w-full h-full object-cover rounded-lg border border-gray-200"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add more images
-                    <input
-                      type="file"
-                      multiple
-                      onChange={handleImageChange}
-                      accept="image/*"
-                      className="hidden"
-                    />
-                  </label>
-                </div>
+                <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add more images
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleNewImageChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </label>
               )}
             </div>
           </div>
@@ -343,7 +496,7 @@ export default function AddOutfit() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  placeholder="Enter dress title"
+                  placeholder="Enter product title"
                   required
                 />
               </div>
@@ -620,29 +773,31 @@ export default function AddOutfit() {
           <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
             <button
               type="button"
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              onClick={() => router.back()}
+              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50"
             >
-              Save as draft
+              Cancel
             </button>
             <button
               type="button"
               onClick={handleSubmit}
               disabled={isLoading}
-              className="px-4 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+              className="px-6 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
             >
               {isLoading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Saving...</span>
+                  <span>Updating...</span>
                 </>
               ) : (
-                <span>Save dress</span>
+                <span>Update Outfit</span>
               )}
             </button>
           </div>
         </div>
       </div>
     </div>
+   </Layout>
    </>
-  );
+    );  
 }

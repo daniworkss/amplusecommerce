@@ -8,7 +8,7 @@ import {getStorage} from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.DATABASEAPIKEY,
+  apiKey: process.env.NEXT_PUBLIC_DATABASE_API_KEY,
   authDomain: process.env.DATABASEDOMAIN,
   projectId: process.env.PROJECTID,
   storageBucket: process.env.STORAGEBUCKET,

@@ -8,6 +8,7 @@ import Link from "next/link"
 import React from "react"
 import { BarLoader } from "react-spinners"
 import ProductCard from "@/components/admin/product-card"
+import ProductDashboardSkeleton from "@/components/admin/sellerdashboardskeleton"
 import { 
   Filter,
   Search,
@@ -161,9 +162,7 @@ export default function SellerDashboardProducts() {
   return (
     <Layout>
       {loading === true ? (
-        <div className="flex justify-center min-h-screen pt-[6rem] lg:items-center">
-          <BarLoader color="#1f763b"/>
-        </div>
+        <ProductDashboardSkeleton/>
       ) : (
         <div className="p-6 lg:p-8 space-y-8 pt-20 lg:pt-6 max-w-7xl mx-auto">
           {/* Page Header */}
@@ -174,9 +173,9 @@ export default function SellerDashboardProducts() {
             </div>
             
             <div className="mt-4 md:mt-0">
-              <Link href={'/admin/dashboard/add-product'} className="bg-gray-800 w-[60%] lg:w-[100%] cursor-pointer hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium flex items-center font-poppins-medium space-x-2 transition-colors duration-100">
+              <Link href={'/admin/dashboard/products/add-product'} className="bg-gray-800 w-[60%] lg:w-[100%] cursor-pointer hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium flex items-center font-poppins-medium space-x-2 transition-colors duration-100">
                 <Plus className="h-4 w-4" />
-                <span>Add New Product</span>
+                <span>Add New Outfitt</span>
               </Link>
             </div>
           </div>

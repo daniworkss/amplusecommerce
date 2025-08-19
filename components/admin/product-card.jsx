@@ -51,7 +51,7 @@ export default function ProductCard({ product, onDelete }) {
                   <button className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center">
                     <Eye className="h-4 w-4 mr-2" /> View Details
                   </button>
-                  <Link href={`/admin/dashboard/edit-product/${product.id}`} className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center">
+                  <Link href={`/admin/dashboard/products/edit-product/${product.id}`} className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center">
                     <Edit className="h-4 w-4 mr-2" /> Edit Product
                   </Link>
                   <button 
@@ -98,7 +98,7 @@ export default function ProductCard({ product, onDelete }) {
         <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
           <span className="text-xs text-gray-500">Added {product?.date_added}</span>
           <div className="flex space-x-2">
-            <Link href={`/sellers/dashboard/edit-product/${product?.id}`} className="p-1 hover:text-orange transition-colors">
+            <Link href={`/admin/dashboard/products/edit-product/${product?.id}`} className="p-1 hover:text-orange transition-colors">
               <Edit className="h-4 w-4" />
             </Link>
             <button 
